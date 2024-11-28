@@ -5,13 +5,19 @@ const Budget = require("../models/budget");
 const router = express.Router();
 
 // Create a new budget entry
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => { // This will handle POST to /api/budget
   try {
-    const newBudget = new Budget(req.body);
-    await newBudget.save();
-    res.status(201).json(newBudget);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const { name, description, amount } = req.body;
+    if (!name || !description || !amount) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+
+    const newBudget = new Budget({ name, description, amount });
+    const savedBudget = await newBudget.save();
+    res.status(201).json(savedBudget);
+  } catch (error) {
+    console.error('Error adding budget:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
