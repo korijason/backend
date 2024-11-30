@@ -1,4 +1,3 @@
-// backend/routes/budgetRoutes.js
 const express = require("express");
 const Budget = require("../models/budget");
 
@@ -28,6 +27,48 @@ router.get("/", async (req, res) => {
     res.status(200).json(budgets);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete a budget entry
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedBudget = await Budget.findByIdAndDelete(id);
+    if (!deletedBudget) {
+      return res.status(404).json({ error: "Budget not found." });
+    }
+    res.status(200).json({ message: "Budget deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting budget:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Update a budget entry
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, amount } = req.body;
+
+    if (!name || !description || !amount) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    const updatedBudget = await Budget.findByIdAndUpdate(
+      id,
+      { name, description, amount },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedBudget) {
+      return res.status(404).json({ error: "Budget not found." });
+    }
+
+    res.status(200).json(updatedBudget);
+  } catch (error) {
+    console.error("Error updating budget:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
